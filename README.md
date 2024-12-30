@@ -1,1 +1,2 @@
-# 100masu-trainer-web
+# 100masu-trainer
+100マス計算WEBアプリ
