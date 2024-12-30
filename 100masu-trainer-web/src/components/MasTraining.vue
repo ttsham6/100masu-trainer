@@ -40,8 +40,7 @@ const submitCalculation = () => {
 const validateInput = (row: number, col: number) => {
   let value = grid.value[row][col];
 
-  // 1~9の範囲に制限
-  if (!/^[1-9]$/.test(value)) {
+  if (!/^\d{1,3}$/.test(value)) {
     grid.value[row][col] = ""; // 不正な入力をクリア
   }
 };
