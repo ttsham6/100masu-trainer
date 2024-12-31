@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "100masu-trainer-aws/**"
+      - "100masu-trainer-web/**"
 
 jobs:
   build:
@@ -32,7 +35,7 @@ jobs:
           name: dist-artifact
           path: ./100masu-trainer-web/dist/
 
-  pulumi-preview:
+  pulumi-up:
     needs: build
 
     runs-on: ubuntu-latest

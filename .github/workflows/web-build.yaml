@@ -2,6 +2,9 @@ name: Web PR Build
 
 on:
   pull_request:
+    paths:
+      - "100masu-trainer-aws/**"
+      - "100masu-trainer-web/**"
 
 jobs:
   build:
