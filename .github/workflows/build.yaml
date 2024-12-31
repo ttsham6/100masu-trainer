@@ -31,6 +31,8 @@ jobs:
           path: ./100masu-trainer-web/dist/
 
   pulumi-preview:
+    needs: build
+
     runs-on: ubuntu-latest
 
     steps:
