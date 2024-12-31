@@ -24,6 +24,12 @@ jobs:
         working-directory: ./100masu-trainer-web
         run: npm run build
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-artifact
+          path: dist/
+
   pulumi-preview:
     runs-on: ubuntu-latest
 
@@ -38,8 +44,13 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-artifact
+
       - name: Copy distribution
-        run: cp -r ./100masu-trainer-web/dist ./100masu-trainer-aws/app/dist
+        run: cp -r dist/ ./100masu-trainer-aws/app/
 
       - name: Pip install
         working-directory: ./100masu-trainer-aws
