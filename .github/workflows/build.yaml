@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist-artifact
-          path: dist/
+          path: ./100masu-trainer-web/dist/
 
   pulumi-preview:
     runs-on: ubuntu-latest
