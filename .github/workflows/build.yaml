@@ -50,6 +50,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dist-artifact
+          download-path: dist/
 
       - name: Copy distribution
         run: cp -r dist/ ./100masu-trainer-aws/app/
