@@ -53,7 +53,7 @@ jobs:
           path: dist/
 
       - name: Copy distribution
-        run: cp -r dist/ ./100masu-trainer-aws/app/
+        run: cp -r dist/ ./100masu-trainer-aws/app/web/dist/
 
       - name: Pip install
         working-directory: ./100masu-trainer-aws
