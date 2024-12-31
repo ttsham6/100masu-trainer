@@ -1,9 +1,6 @@
-name: Build and Test
+name: Web PR Build
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
 
 jobs:
@@ -27,3 +24,32 @@ jobs:
         working-directory: ./100masu-trainer-web
         run: npm run build
 
+  pulumi-preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Copy distribution
+        run: cp -r ./100masu-trainer-web/dist ./100masu-trainer-aws/app/dist
+
+      - name: Pip install
+        working-directory: ./100masu-trainer-aws
+        run: pip install -r requirements.txt
+
+      - name: Pulumi preview
+        uses: pulumi/actions@v3
+        with:
+          command: preview
+          stack-name: ttsham6/100masu-trainer-aws/dev
+          work-dir: ./100masu-trainer-aws
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

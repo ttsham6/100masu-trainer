@@ -22,7 +22,7 @@ def setup():
     web_image = awsx.ecr.Image(
         f"{service_name}-image",
         repository_url=web_repo.url,
-        context="./tmp/web",
+        context="./app/web",
         platform="linux/amd64"
     )
 
