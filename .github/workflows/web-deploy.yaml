@@ -1,7 +1,9 @@
 name: Web deploy
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -62,7 +64,7 @@ jobs:
       - name: Pulumi preview
         uses: pulumi/actions@v3
         with:
-          command: preview
+          command: up
           stack-name: ttsham6/100masu-trainer-aws/dev
           work-dir: ./100masu-trainer-aws
         env:

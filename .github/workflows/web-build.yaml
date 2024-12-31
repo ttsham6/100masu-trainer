@@ -1,9 +1,7 @@
 name: Web PR Build
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
 
 jobs:
   build:
@@ -64,7 +62,7 @@ jobs:
       - name: Pulumi preview
         uses: pulumi/actions@v3
         with:
-          command: up
+          command: preview
           stack-name: ttsham6/100masu-trainer-aws/dev
           work-dir: ./100masu-trainer-aws
         env:
