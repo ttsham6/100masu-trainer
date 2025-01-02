@@ -58,9 +58,9 @@ jobs:
       - name: Copy distribution
         run: cp -r dist/ ./100masu-trainer-aws/app/web/dist/
 
-      - name: Pip install
+      - name: Npm Install
         working-directory: ./100masu-trainer-aws
-        run: pip install -r requirements.txt
+        run: npm install
 
       - name: Pulumi preview
         uses: pulumi/actions@v3
