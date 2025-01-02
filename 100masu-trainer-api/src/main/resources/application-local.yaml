@@ -1,0 +1,16 @@
+spring:
+  sql:
+    init:
+      schema-locations: classpath:db/scheme.sql
+  datasource:
+    url: jdbc:h2:mem:masu_db
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true # H2コンソールを有効化
+      path: /h2-console # アクセスパス
+  jpa:
+    hibernate:
+      ddl-auto: update # スキーマ自動更新
