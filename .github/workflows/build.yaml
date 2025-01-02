@@ -5,10 +5,18 @@ on:
     paths:
       - "100masu-trainer-aws/**"
       - "100masu-trainer-web/**"
+      # - "100masu-trainer-api/**" // TODO: Add API build
 
 jobs:
-  build:
+  web-build:
     runs-on: ubuntu-latest
+
+    if: |
+      ${{ 
+        github.event_name == 'push' &&
+        github.event.head_commit.modified && 
+        contains(github.event.head_commit.modified, '100masu-trainer-web/') 
+      }}
 
     steps:
       - name: Checkout code
@@ -34,7 +42,17 @@ jobs:
           path: ./100masu-trainer-web/dist/
 
   pulumi-preview:
-    needs: build
+    needs: web-build
+
+    if: |
+      ${{ 
+        github.event_name == 'push' && 
+        github.event.head_commit.modified && 
+        (
+          contains(github.event.head_commit.modified, '100masu-trainer-web/') ||
+          contains(github.event.head_commit.modified, '100masu-trainer-aws/')
+        ) 
+      }}
 
     runs-on: ubuntu-latest
 
