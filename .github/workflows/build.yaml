@@ -9,14 +9,14 @@ on:
 
 jobs:
   web-build:
-    runs-on: ubuntu-latest
-
     if: |
       ${{ 
         github.event_name == 'push' &&
         github.event.head_commit.modified && 
         contains(github.event.head_commit.modified, '100masu-trainer-web/') 
       }}
+
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
