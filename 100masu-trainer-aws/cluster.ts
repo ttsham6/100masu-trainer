@@ -19,41 +19,52 @@ export class Cluster extends pulumi.ComponentResource {
     // An ALB to serve the container endpoint to the internet
     const loadbalancer = new awsx.lb.ApplicationLoadBalancer(
       `${serviceNAme}-lb`,
-      {}
+      {},
+      { parent: this }
     );
 
     // An ECR repository to store our application's container image
-    const repo = new awsx.ecr.Repository(`${serviceNAme}-repo`, {
-      forceDelete: true,
-    });
+    const repo = new awsx.ecr.Repository(
+      `${serviceNAme}-repo`,
+      { forceDelete: true },
+      { parent: this }
+    );
 
     // Build and publish our application's container image from ./app to the ECR repository
-    const image = new awsx.ecr.Image(`${serviceNAme}-image`, {
-      repositoryUrl: repo.url,
-      context: "./app/web",
-      platform: "linux/amd64",
-    });
+    const image = new awsx.ecr.Image(
+      `${serviceNAme}-image`,
+      {
+        repositoryUrl: repo.url,
+        context: "./app/web",
+        platform: "linux/amd64",
+      },
+      { parent: this }
+    );
 
     // Deploy an ECS Service on Fargate to host the application container
-    const service = new awsx.ecs.FargateService(`${serviceNAme}-service`, {
-      cluster: cluster.arn,
-      assignPublicIp: true,
-      taskDefinitionArgs: {
-        container: {
-          name: "app",
-          image: image.imageUri,
-          cpu: cpu,
-          memory: memory,
-          essential: true,
-          portMappings: [
-            {
-              containerPort: containerPort,
-              targetGroup: loadbalancer.defaultTargetGroup,
-            },
-          ],
+    const service = new awsx.ecs.FargateService(
+      `${serviceNAme}-service`,
+      {
+        cluster: cluster.arn,
+        assignPublicIp: true,
+        taskDefinitionArgs: {
+          container: {
+            name: "app",
+            image: image.imageUri,
+            cpu: cpu,
+            memory: memory,
+            essential: true,
+            portMappings: [
+              {
+                containerPort: containerPort,
+                targetGroup: loadbalancer.defaultTargetGroup,
+              },
+            ],
+          },
         },
       },
-    });
+      { parent: this }
+    );
 
     // Set member variables for this component
     this.dnsName = loadbalancer.loadBalancer.dnsName;
