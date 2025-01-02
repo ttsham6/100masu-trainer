@@ -1,15 +1,21 @@
-name: Web deploy
+name: Web PR Build
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
     paths:
       - "100masu-trainer-aws/**"
       - "100masu-trainer-web/**"
+      # - "100masu-trainer-api/**" // TODO: Add API build
 
 jobs:
-  build:
+  web-build:
+    if: |
+      ${{ 
+        github.event_name == 'push' &&
+        github.event.head_commit.modified && 
+        contains(github.event.head_commit.modified, '100masu-trainer-web/') 
+      }}
+
     runs-on: ubuntu-latest
 
     steps:
@@ -35,8 +41,18 @@ jobs:
           name: dist-artifact
           path: ./100masu-trainer-web/dist/
 
-  pulumi-up:
-    needs: build
+  pulumi-preview:
+    needs: web-build
+
+    if: |
+      ${{ 
+        github.event_name == 'push' && 
+        github.event.head_commit.modified && 
+        (
+          contains(github.event.head_commit.modified, '100masu-trainer-web/') ||
+          contains(github.event.head_commit.modified, '100masu-trainer-aws/')
+        ) 
+      }}
 
     runs-on: ubuntu-latest
 
@@ -67,7 +83,7 @@ jobs:
       - name: Pulumi preview
         uses: pulumi/actions@v3
         with:
-          command: up
+          command: preview
           stack-name: ttsham6/100masu-trainer-aws/dev
           work-dir: ./100masu-trainer-aws
         env:
