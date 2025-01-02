@@ -161,6 +161,7 @@ export class Vpc extends pulumi.ComponentResource {
       },
       { parent: this }
     );
+    setAllAllowEgressRule(webAlbSg.id, `${pjName}-alb-sg`, this);
 
     const webSg = new aws.ec2.SecurityGroup(
       `${pjName}-web-sg`,
@@ -176,10 +177,12 @@ export class Vpc extends pulumi.ComponentResource {
         referencedSecurityGroupId: webAlbSg.id,
         securityGroupId: webSg.id,
         ipProtocol: "tcp",
+        fromPort: 80,
         toPort: 80,
       },
       { parent: this }
     );
+    setAllAllowEgressRule(webSg.id, `${pjName}-web-sg`, this);
 
     const apiAlbSg = new aws.ec2.SecurityGroup(
       `${pjName}-api-alb-sg`,
@@ -196,9 +199,11 @@ export class Vpc extends pulumi.ComponentResource {
         referencedSecurityGroupId: webSg.id,
         ipProtocol: "tcp",
         fromPort: 80,
+        toPort: 80,
       },
       { parent: this }
     );
+    setAllAllowEgressRule(apiAlbSg.id, `${pjName}-api-alb-sg`, this);
 
     const apiSecurityGroup = new aws.ec2.SecurityGroup(
       `${pjName}-api-sg`,
@@ -214,10 +219,12 @@ export class Vpc extends pulumi.ComponentResource {
         securityGroupId: apiSecurityGroup.id,
         referencedSecurityGroupId: apiAlbSg.id,
         ipProtocol: "tcp",
+        fromPort: 80,
         toPort: 80,
       },
       { parent: this }
     );
+    setAllAllowEgressRule(apiSecurityGroup.id, `${pjName}-api-sg`, this);
 
     const dbSecurityGroup = new aws.ec2.SecurityGroup(
       `${pjName}-db-sg`,
@@ -233,12 +240,14 @@ export class Vpc extends pulumi.ComponentResource {
         securityGroupId: dbSecurityGroup.id,
         referencedSecurityGroupId: apiSecurityGroup.id,
         ipProtocol: "tcp",
+        fromPort: 3306,
         toPort: 3306,
       },
       {
         parent: this,
       }
     );
+    setAllAllowEgressRule(dbSecurityGroup.id, `${pjName}-db-sg`, this);
 
     // Set Outputs
     this.vpcId = vpc.id;
@@ -253,4 +262,22 @@ export class Vpc extends pulumi.ComponentResource {
 
     this.registerOutputs({});
   }
+}
+
+function setAllAllowEgressRule(
+  sgId: pulumi.Output<string>,
+  sgName: string,
+  parent: pulumi.ComponentResource
+) {
+  const allAllowEgress = new aws.vpc.SecurityGroupEgressRule(
+    `${sgName}-all-allow-egress`,
+    {
+      securityGroupId: sgId,
+      cidrIpv4: "0.0.0.0/0",
+      ipProtocol: "-1",
+      fromPort: 0,
+      toPort: 0,
+    },
+    { parent }
+  );
 }
