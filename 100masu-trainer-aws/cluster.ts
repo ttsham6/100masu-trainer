@@ -7,6 +7,8 @@ export interface ClusterArgs {
   subnetIds: pulumi.Output<string[]>;
   albSgId: pulumi.Output<string>;
   containerSgId: pulumi.Output<string>;
+  contextPath: string;
+  environment: Object[];
 }
 
 export class Cluster extends pulumi.ComponentResource {
@@ -46,7 +48,7 @@ export class Cluster extends pulumi.ComponentResource {
       `${serviceNAme}-image`,
       {
         repositoryUrl: repo.url,
-        context: "./app/web",
+        context: args.contextPath,
         platform: "linux/amd64",
       },
       { parent: this }
@@ -70,6 +72,7 @@ export class Cluster extends pulumi.ComponentResource {
                 targetGroup: loadbalancer.defaultTargetGroup,
               },
             ],
+            environment: args.environment,
           },
         },
         networkConfiguration: {
@@ -77,7 +80,7 @@ export class Cluster extends pulumi.ComponentResource {
           subnets: args.subnetIds,
           securityGroups: [args.containerSgId],
         },
-        desiredCount: 0,
+        desiredCount: 1,
       },
       { parent: this }
     );
