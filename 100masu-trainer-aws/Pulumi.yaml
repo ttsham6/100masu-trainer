@@ -1,13 +1,10 @@
 name: 100masu-trainer-aws
-description: A Python program to deploy a containerized service on AWS
+description: A TypeScript program to deploy a containerized service on AWS
 runtime:
-  name: python
+  name: nodejs
   options:
-    toolchain: pip
-    virtualenv: venv
+    packagemanager: npm
 config:
   pulumi:tags:
     value:
-      pulumi:template: container-aws-python
-  docker:host:
-      value: unix:///var/run/docker.sock
+      pulumi:template: container-aws-typescript
