@@ -36,7 +36,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dist-artifact
+          name: api-artifact
           path: ./100masu-trainer-api/build/libs/app.jar
 
   web-build:
@@ -62,7 +62,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dist-artifact
+          name: web-artifact
           path: ./100masu-trainer-web/dist/
 
   pulumi-preview:
@@ -94,11 +94,17 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Download build artifacts
+      - name: Download API artifact
         uses: actions/download-artifact@v3
         with:
-          name: dist-artifact
-          path: /
+          name: api-artifact
+          path: ./
+
+      - name: Download web artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: web-artifact
+          path: dist/
 
       - name: Copy distribution
         run: |
