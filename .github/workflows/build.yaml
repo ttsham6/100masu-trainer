@@ -2,25 +2,28 @@ name: Web PR Build
 
 on:
   pull_request:
-    # paths:
-    # - "100masu-trainer-aws/**"
-    # - "100masu-trainer-web/**"
-    # - "100masu-trainer-api/**" // TODO: Add API build
+    paths:
+      - "100masu-trainer-aws/**"
+      - "100masu-trainer-web/**"
+      - "100masu-trainer-api/**"
 
 jobs:
   api-build:
-    if: |
-      ${{ 
-        github.event_name == 'push' &&
-        github.event.head_commit.modified && 
-        contains(github.event.head_commit.modified, '100masu-trainer-api/') 
-      }}
-
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Gradle Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Gradle build
         working-directory: ./100masu-trainer-api
@@ -37,13 +40,6 @@ jobs:
           path: ./100masu-trainer-api/build/libs/app.jar
 
   web-build:
-    if: |
-      ${{ 
-        github.event_name == 'push' &&
-        github.event.head_commit.modified && 
-        contains(github.event.head_commit.modified, '100masu-trainer-web/') 
-      }}
-
     runs-on: ubuntu-latest
 
     steps:
@@ -70,23 +66,26 @@ jobs:
           path: ./100masu-trainer-web/dist/
 
   pulumi-preview:
-    needs: web-build
-
-    if: |
-      ${{ 
-        github.event_name == 'push' && 
-        github.event.head_commit.modified && 
-        (
-          contains(github.event.head_commit.modified, '100masu-trainer-web/') ||
-          contains(github.event.head_commit.modified, '100masu-trainer-aws/')
-        ) 
-      }}
+    needs: [web-build, api-build]
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
