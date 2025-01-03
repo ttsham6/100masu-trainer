@@ -2,12 +2,40 @@ name: Web PR Build
 
 on:
   pull_request:
-    paths:
-      - "100masu-trainer-aws/**"
-      - "100masu-trainer-web/**"
-      # - "100masu-trainer-api/**" // TODO: Add API build
+    # paths:
+    # - "100masu-trainer-aws/**"
+    # - "100masu-trainer-web/**"
+    # - "100masu-trainer-api/**" // TODO: Add API build
 
 jobs:
+  api-build:
+    if: |
+      ${{ 
+        github.event_name == 'push' &&
+        github.event.head_commit.modified && 
+        contains(github.event.head_commit.modified, '100masu-trainer-api/') 
+      }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Gradle build
+        working-directory: ./100masu-trainer-api
+        run: ./gradlew build
+
+      - name: copy jar
+        working-directory: ./100masu-trainer-api
+        run: cp build/libs/*.jar build/libs/app.jar
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-artifact
+          path: ./100masu-trainer-api/build/libs/app.jar
+
   web-build:
     if: |
       ${{ 
@@ -71,10 +99,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dist-artifact
-          path: dist/
+          path: /
 
       - name: Copy distribution
-        run: cp -r dist/ ./100masu-trainer-aws/app/web/dist/
+        run: |
+          cp -r app.jar ./100masu-trainer-aws/app/api/app.jar
+          cp -r dist/ ./100masu-trainer-aws/app/web/dist/
 
       - name: Npm Install
         working-directory: ./100masu-trainer-aws

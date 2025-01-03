@@ -13,6 +13,10 @@ java {
     }
 }
 
+tasks.jar {
+    enabled = false
+}
+
 repositories {
     mavenCentral()
 }
