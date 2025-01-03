@@ -29,6 +29,7 @@ const apiCluster = new cluster.Cluster("masu-api", {
     { name: "DB_NAME", value: pjDb.dbName },
     { name: "DB_USER", value: pjDb.username },
     { name: "DB_PASSWORD", value: pjDb.password },
+    { name: "SPRING_PROFILES_ACTIVE", value: config.get("environment") },
   ],
 });
 

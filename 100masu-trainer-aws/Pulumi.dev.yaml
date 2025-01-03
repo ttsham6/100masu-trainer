@@ -1,4 +1,5 @@
 config:
+  100masu-trainer-aws:environment: dev
   100masu-trainer-aws:containerPort: "80"
   100masu-trainer-aws:cpu: "256"
   100masu-trainer-aws:memory: "128"
