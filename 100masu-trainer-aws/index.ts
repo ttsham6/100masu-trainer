@@ -19,12 +19,14 @@ const pjDb = new db.Db("masu", {
 
 // Api
 const apiCluster = new cluster.Cluster("masu-api", {
+  clusterName: "ApiCluster",
   vpcId: vpc.vpcId,
   subnetIds: vpc.apiSubnetIds,
   albSgId: vpc.apiAlbSecurityGroupId,
   containerSgId: vpc.apiSecurityGroupId,
   contextPath: "./app/api",
-  environment: [
+  heatlthCheckPath: "/actuator/health",
+  environments: [
     { name: "DB_HOST", value: pjDb.address },
     { name: "DB_NAME", value: pjDb.dbName },
     { name: "DB_USER", value: pjDb.username },
@@ -35,12 +37,13 @@ const apiCluster = new cluster.Cluster("masu-api", {
 
 // WEB Cluster
 // const webCluster = new cluster.Cluster("masu-web", {
+//   clusterName: "WebCluster",
 //   vpcId: vpc.vpcId,
 //   subnetIds: vpc.webSubnetIds,
 //   albSgId: vpc.webAlbSecurityGroupId,
 //   containerSgId: vpc.webSecurityGroupId,
 //   contextPath: "./app/web",
-//   environment: [],
+//   environments: [],
 // });
 
 // The URL at which the container's HTTP endpoint will be available
