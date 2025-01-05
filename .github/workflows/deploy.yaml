@@ -10,14 +10,8 @@ on:
       # - "100masu-trainer-api/**" // TODO: Add API Deploy
 
 jobs:
-  build:
-    if: |
-      ${{ 
-        github.event_name == 'push' &&
-        github.event.head_commit.modified && 
-        contains(github.event.head_commit.modified, '100masu-trainer-web/') 
-      }}
-
+  # TODO: Add API build job
+  web-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,21 +34,11 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dist-artifact
+          name: web-artifact
           path: ./100masu-trainer-web/dist/
 
   pulumi-up:
-    needs: build
-
-    if: |
-      ${{ 
-        github.event_name == 'push' && 
-        github.event.head_commit.modified && 
-        (
-          contains(github.event.head_commit.modified, '100masu-trainer-web/') ||
-          contains(github.event.head_commit.modified, '100masu-trainer-aws/')
-        ) 
-      }}
+    needs: web-build
 
     runs-on: ubuntu-latest
 

@@ -2,6 +2,9 @@ import { rds } from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 export interface DbArgs {
+  dbName: string;
+  dbUser: string;
+  dbPassword: pulumi.Output<string>;
   subnetIds: pulumi.Output<string[]>;
   securityGroupId: pulumi.Output<string>;
 }
@@ -9,7 +12,8 @@ export interface DbArgs {
 export class Db extends pulumi.ComponentResource {
   public readonly address: pulumi.Output<string>;
   public readonly dbName: pulumi.Output<string>;
-  public readonly dbUser: pulumi.Output<string>;
+  public readonly username: pulumi.Output<string>;
+  public readonly password: pulumi.Output<string | undefined>;
 
   constructor(
     pjName: string,
@@ -32,15 +36,16 @@ export class Db extends pulumi.ComponentResource {
     const db = new rds.Instance(
       `${pjName}-db`,
       {
-        dbName: "masudb",
+        dbName: args.dbName,
         allocatedStorage: 20,
         engine: "mysql",
         engineVersion: "8.0.39",
         instanceClass: "db.t3.micro",
-        username: "admin",
-        manageMasterUserPassword: true,
+        username: args.dbUser,
+        password: args.dbPassword,
         dbSubnetGroupName: dbSubnetGroup.name,
         vpcSecurityGroupIds: [args.securityGroupId],
+        skipFinalSnapshot: true,
         tags: { Name: `${pjName}-db` },
       },
       { parent: this }
@@ -48,6 +53,7 @@ export class Db extends pulumi.ComponentResource {
 
     this.address = db.address;
     this.dbName = db.dbName;
-    this.dbUser = db.username;
+    this.username = db.username;
+    this.password = db.password;
   }
 }

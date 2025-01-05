@@ -275,8 +275,8 @@ function setAllAllowEgressRule(
       securityGroupId: sgId,
       cidrIpv4: "0.0.0.0/0",
       ipProtocol: "-1",
-      fromPort: 0,
-      toPort: 0,
+      fromPort: -1,
+      toPort: -1,
     },
     { parent }
   );

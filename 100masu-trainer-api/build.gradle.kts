@@ -13,6 +13,10 @@ java {
     }
 }
 
+tasks.jar {
+    enabled = false
+}
+
 repositories {
     mavenCentral()
 }
@@ -21,6 +25,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("com.h2database:h2:2.3.232")
 
     runtimeOnly("com.zaxxer:HikariCP")
