@@ -53,10 +53,10 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Download build artifacts
+      - name: Download web artifact
         uses: actions/download-artifact@v3
         with:
-          name: dist-artifact
+          name: web-artifact
           path: dist/
 
       - name: Copy distribution
