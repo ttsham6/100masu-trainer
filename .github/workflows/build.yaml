@@ -1,4 +1,4 @@
-name: Web PR Build
+name: Build
 
 on:
   pull_request:
