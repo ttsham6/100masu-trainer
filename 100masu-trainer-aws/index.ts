@@ -20,6 +20,7 @@ const pjDb = new db.Db("masu", {
 // Api
 const apiCluster = new cluster.Cluster("masu-api", {
   clusterName: "ApiCluster",
+  assignPublicIp: false,
   vpcId: vpc.vpcId,
   subnetIds: vpc.apiSubnetIds,
   albSgId: vpc.apiAlbSecurityGroupId,
@@ -36,15 +37,16 @@ const apiCluster = new cluster.Cluster("masu-api", {
 });
 
 // WEB Cluster
-// const webCluster = new cluster.Cluster("masu-web", {
-//   clusterName: "WebCluster",
-//   vpcId: vpc.vpcId,
-//   subnetIds: vpc.webSubnetIds,
-//   albSgId: vpc.webAlbSecurityGroupId,
-//   containerSgId: vpc.webSecurityGroupId,
-//   contextPath: "./app/web",
-//   environments: [],
-// });
+const webCluster = new cluster.Cluster("masu-web", {
+  clusterName: "WebCluster",
+  assignPublicIp: true,
+  vpcId: vpc.vpcId,
+  subnetIds: vpc.webSubnetIds,
+  albSgId: vpc.webAlbSecurityGroupId,
+  containerSgId: vpc.webSecurityGroupId,
+  contextPath: "./app/web",
+  environments: [],
+});
 
 // The URL at which the container's HTTP endpoint will be available
-// export const url = pulumi.interpolate`http://${webCluster.dnsName}`;
+export const url = pulumi.interpolate`http://${webCluster.dnsName}`;
