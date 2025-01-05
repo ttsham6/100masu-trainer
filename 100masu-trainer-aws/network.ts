@@ -41,17 +41,6 @@ export class Vpc extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    // Route Table
-    const routeTable = new aws.ec2.RouteTable(
-      `${pjName}-route-table`,
-      {
-        vpcId: vpc.id,
-        routes: [{ cidrBlock: "0.0.0.0/0", gatewayId: igw.id }],
-        tags: { Name: `${pjName}-route-table` },
-      },
-      { parent: this }
-    );
-
     // Subnets
     const webSubnets = [
       new aws.ec2.Subnet(
@@ -128,13 +117,57 @@ export class Vpc extends pulumi.ComponentResource {
       ),
     ];
 
+    // Nat Gateway
+    const eip = new aws.ec2.Eip(`${pjName}-eip`, {}, { parent: this });
+    const natGateway = new aws.ec2.NatGateway(
+      `${pjName}-nat-gateway`,
+      {
+        allocationId: eip.id,
+        subnetId: webSubnets[0].id,
+        tags: { Name: `${pjName}-nat-gateway` },
+      },
+      { parent: this, dependsOn: [igw] }
+    );
+
+    // Route Table
+    const publicRouteTable = new aws.ec2.RouteTable(
+      `${pjName}-public-route-table`,
+      {
+        vpcId: vpc.id,
+        routes: [{ cidrBlock: "0.0.0.0/0", gatewayId: igw.id }],
+        tags: { Name: `${pjName}-public-route-table` },
+      },
+      { parent: this }
+    );
+
+    const privateRouteTable = new aws.ec2.RouteTable(
+      `${pjName}-private-route-table`,
+      {
+        vpcId: vpc.id,
+        routes: [{ cidrBlock: "0.0.0.0/0", natGatewayId: natGateway.id }],
+        tags: { Name: `${pjName}-private-route-table` },
+      },
+      { parent: this }
+    );
+
     // Route Table association
-    const subnetIds = [...webSubnets, ...apiSubnets, ...dbSubnets];
+    for (let i = 0; i < webSubnets.length; i++) {
+      const _ = new aws.ec2.RouteTableAssociation(
+        `${pjName}-public-rt-assoc-${i}`,
+        {
+          routeTableId: publicRouteTable.id,
+          subnetId: webSubnets[i].id,
+        },
+        { parent: this }
+      );
+    }
+
+    const subnetIds = [...apiSubnets, ...dbSubnets];
     for (let i = 0; i < subnetIds.length; i++) {
       const _ = new aws.ec2.RouteTableAssociation(
-        `${pjName}-rt-assoc-${i}`,
+        `${pjName}-private-rt-assoc-${i}`,
         {
-          routeTableId: routeTable.id,
+          routeTableId: privateRouteTable.id,
           subnetId: subnetIds[i].id,
         },
         { parent: this }
