@@ -40,9 +40,6 @@ const apiCluster = new cluster.Cluster("masu-api", {
 const webCluster = new cluster.Cluster("masu-web", {
   clusterName: "WebCluster",
   assignPublicIp: true,
-// Api
-const apiCluster = new cluster.Cluster("masu-api", {
-  clusterName: "ApiCluster",
   vpcId: vpc.vpcId,
   subnetIds: vpc.webSubnetIds,
   albSgId: vpc.webAlbSecurityGroupId,
@@ -51,16 +48,5 @@ const apiCluster = new cluster.Cluster("masu-api", {
   environments: [],
 });
 
-// WEB Cluster
-// const webCluster = new cluster.Cluster("masu-web", {
-//   clusterName: "WebCluster",
-//   vpcId: vpc.vpcId,
-//   subnetIds: vpc.webSubnetIds,
-//   albSgId: vpc.webAlbSecurityGroupId,
-//   containerSgId: vpc.webSecurityGroupId,
-//   contextPath: "./app/web",
-//   environments: [],
-// });
-
 // The URL at which the container's HTTP endpoint will be available
-// export const url = pulumi.interpolate`http://${webCluster.dnsName}`;
+export const url = pulumi.interpolate`http://${webCluster.dnsName}`;
