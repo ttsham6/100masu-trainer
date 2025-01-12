@@ -4,6 +4,7 @@ import * as awsx from "@pulumi/awsx";
 
 export interface ClusterArgs {
   clusterName: string;
+  assignPublicIp: boolean;
   vpcId: pulumi.Output<string>;
   subnetIds: pulumi.Output<string[]>;
   albSgId: pulumi.Output<string>;

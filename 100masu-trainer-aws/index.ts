@@ -20,6 +20,7 @@ const pjDb = new db.Db("masu", {
 // Api
 const apiCluster = new cluster.Cluster("masu-api", {
   clusterName: "ApiCluster",
+  assignPublicIp: false,
   vpcId: vpc.vpcId,
   subnetIds: vpc.apiSubnetIds,
   albSgId: vpc.apiAlbSecurityGroupId,
@@ -33,6 +34,21 @@ const apiCluster = new cluster.Cluster("masu-api", {
     { name: "DB_PASSWORD", value: pjDb.password },
     { name: "SPRING_PROFILES_ACTIVE", value: config.get("environment") },
   ],
+});
+
+// WEB Cluster
+const webCluster = new cluster.Cluster("masu-web", {
+  clusterName: "WebCluster",
+  assignPublicIp: true,
+// Api
+const apiCluster = new cluster.Cluster("masu-api", {
+  clusterName: "ApiCluster",
+  vpcId: vpc.vpcId,
+  subnetIds: vpc.webSubnetIds,
+  albSgId: vpc.webAlbSecurityGroupId,
+  containerSgId: vpc.webSecurityGroupId,
+  contextPath: "./app/web",
+  environments: [],
 });
 
 // WEB Cluster
