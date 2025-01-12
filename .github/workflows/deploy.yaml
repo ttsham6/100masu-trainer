@@ -7,10 +7,40 @@ on:
     paths:
       - "100masu-trainer-aws/**"
       - "100masu-trainer-web/**"
-      # - "100masu-trainer-api/**" // TODO: Add API Deploy
+      - "100masu-trainer-api/**"
 
 jobs:
-  # TODO: Add API build job
+  api-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Gradle Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Gradle build
+        working-directory: ./100masu-trainer-api
+        run: ./gradlew build
+
+      - name: copy jar
+        working-directory: ./100masu-trainer-api
+        run: cp build/libs/*.jar build/libs/app.jar
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-artifact
+          path: ./100masu-trainer-api/build/libs/app.jar
+
   web-build:
     runs-on: ubuntu-latest
 
