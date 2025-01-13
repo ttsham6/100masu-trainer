@@ -68,13 +68,26 @@ jobs:
           path: ./100masu-trainer-web/dist/
 
   pulumi-up:
-    needs: web-build
+    needs: [web-build, api-build]
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -83,6 +96,12 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: Download API artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: api-artifact
+          path: ./
+
       - name: Download web artifact
         uses: actions/download-artifact@v3
         with:
@@ -90,7 +109,9 @@ jobs:
           path: dist/
 
       - name: Copy distribution
-        run: cp -r dist/ ./100masu-trainer-aws/app/web/dist/
+        run: |
+          cp -r app.jar ./100masu-trainer-aws/app/api/app.jar
+          cp -r dist/ ./100masu-trainer-aws/app/web/dist/
 
       - name: Npm Install
         working-directory: ./100masu-trainer-aws
