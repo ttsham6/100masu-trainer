@@ -5,4 +5,4 @@ config:
   100masu-trainer-aws:memory: "256"
   aws:region: ap-northeast-1
   100masu-trainer-aws:dbPassword:
-    secure: AAABAK7QmNUPwpPFbIsC2Hq5u+wLGwqCrSMgQiPbVx26AdQs20QIQ5g=
+    secure: AAABAOPRL/cNiZUEnuTG/EiyIg+Mp75CbU9Xrt/p+aohy+d1uXvLR/c=

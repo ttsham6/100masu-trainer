@@ -48,7 +48,7 @@ export class Cluster extends pulumi.ComponentResource {
             enabled: true,
             path: args.heatlthCheckPath || "/",
             port: `${containerPort}`,
-            protocol: "http",
+            protocol: "HTTP",
             timeout: 10,
           },
         },
