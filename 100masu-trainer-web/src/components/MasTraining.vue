@@ -45,6 +45,12 @@ const startCalculation = () => {
   }, 1000);
 };
 
+const resetCalculation = () => {
+  isStarted.value = false;
+  elapsedTime.value = "0分0秒";
+  grid.value = Array.from({ length: 10 });
+};
+
 // 答え合わせ
 const submitCalculation = () => {
   if (!startTime.value) {
@@ -150,9 +156,13 @@ body {
   height: 100vh;
   margin: 0;
   background-color: #f9f9f9;
+  overflow: hidden;
 }
 .container {
   text-align: center;
+  overflow: auto; /* コンテンツが溢れた場合にスクロール可能にする */
+  max-height: 100vh;
+  padding-bottom: 70px;
 }
 table {
   border-collapse: collapse;
@@ -194,7 +204,7 @@ input.incorrect {
   left: 50%;
   transform: translate(-50%, -50%);
   color: red;
-  font-size: 12px; /* X印を細くするため、フォントサイズを小さくする */
+  font-size: 12px;
   pointer-events: none;
 }
 .button {
@@ -208,6 +218,7 @@ button {
   background-color: #4caf50;
   color: white;
   border-radius: 5px;
+  margin-right: 20px;
 }
 button:hover {
   background-color: #45a049;
@@ -217,12 +228,13 @@ button:hover {
 <template>
   <div class="container">
     <h1>100マス計算</h1>
-    <h2>足し算</h2>
+    <b>足し算</b>
     <div class="button" v-if="!isStarted">
       <button @click="startCalculation">スタート</button>
     </div>
     <div v-if="isStarted" class="status-bar">
       <p>時間経過: {{ elapsedTime }}</p>
+      <button @click="resetCalculation">最初からやり直す</button>
       <button @click="submitCalculation">答え合わせ</button>
     </div>
     <div v-if="isStarted">
