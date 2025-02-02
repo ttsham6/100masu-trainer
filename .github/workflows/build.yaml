@@ -1,5 +1,8 @@
 name: Build
 
+env:
+  AWS_PROFILE: pulumi
+
 on:
   pull_request:
     paths:
