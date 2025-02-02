@@ -27,7 +27,7 @@ const apiCluster = new cluster.Cluster("masu-api", {
   albSgId: vpc.apiAlbSecurityGroupId,
   containerSgId: vpc.apiSecurityGroupId,
   contextPath: "./app/api",
-  heatlthCheckPath: "/actuator/health",
+  healthCheckPath: "/actuator/health",
   environments: [
     { name: "DB_HOST", value: pjDb.address },
     { name: "DB_NAME", value: pjDb.dbName },
