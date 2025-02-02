@@ -1,8 +1,5 @@
 name: Build
 
-env:
-  AWS_PROFILE: pulumi
-
 on:
   pull_request:
     paths:
@@ -72,10 +69,6 @@ jobs:
     needs: [web-build, api-build]
 
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - name: Checkout code

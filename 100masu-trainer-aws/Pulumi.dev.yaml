@@ -1,5 +1,4 @@
 config:
-  aws:profile: pulumi
   aws:region: ap-northeast-1
   100masu-trainer-aws:environment: dev
   100masu-trainer-aws:containerPort: "80"
