@@ -1,5 +1,6 @@
 {
     "name": "100masu-trainer-aws",
+    "type": "module",
     "devDependencies": {
         "@types/node": "^18",
         "typescript": "^5.2.0"
