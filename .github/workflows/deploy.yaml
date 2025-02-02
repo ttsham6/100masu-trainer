@@ -106,11 +106,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: web-artifact
-          path: ./dist/
+          path: dist/
 
       - name: Copy distribution
         run: |
           cp -r app.jar ./100masu-trainer-aws/app/api/app.jar
+          mkdir -p ./100masu-trainer-aws/app/web/dist/
           cp -r dist/ ./100masu-trainer-aws/app/web/dist/
 
       - name: Npm Install
