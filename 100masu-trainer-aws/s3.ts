@@ -44,11 +44,15 @@ export class S3bucket extends pulumi.ComponentResource {
         let itemPath = prefix ? path.join(prefix, item) : item;
         itemPath = itemPath.replace(/\\/g, "/"); // convert Windows paths to something S3 will recognize
 
-        new aws.s3.BucketObject(itemPath, {
-          bucket: s3bucket,
-          source: new pulumi.asset.FileAsset(filePath),
-          contentType: mime.getType(filePath) || undefined,
-        });
+        new aws.s3.BucketObject(
+          itemPath,
+          {
+            bucket: s3bucket,
+            source: new pulumi.asset.FileAsset(filePath),
+            contentType: mime.getType(filePath) || undefined,
+          },
+          { parent: this }
+        );
       });
     };
 
@@ -76,17 +80,25 @@ export class S3bucket extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    new aws.s3.BucketWebsiteConfigurationV2("s3-website-bucket-config", {
-      bucket: siteBucket.id,
-      indexDocument: {
-        suffix: "index.html",
+    new aws.s3.BucketWebsiteConfigurationV2(
+      "s3-website-bucket-config",
+      {
+        bucket: siteBucket.id,
+        indexDocument: {
+          suffix: "index.html",
+        },
       },
-    });
+      { parent: this }
+    );
 
-    new aws.s3.BucketPublicAccessBlock("public-access-block", {
-      bucket: siteBucket.id,
-      blockPublicAcls: false,
-    });
+    new aws.s3.BucketPublicAccessBlock(
+      "public-access-block",
+      {
+        bucket: siteBucket.id,
+        blockPublicAcls: false,
+      },
+      { parent: this }
+    );
 
     this.bucket = siteBucket;
   }
