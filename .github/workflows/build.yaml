@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: web-artifact
-          path: ./100masu-trainer-web/.output/
+          path: ./100masu-trainer-web/.nuxt/
 
   pulumi-preview:
     needs: [web-build, api-build]
@@ -104,12 +104,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: web-artifact
-          path: dist/
+          path: .nuxt/
 
       - name: Copy distribution
         run: |
           cp -r app.jar ./100masu-trainer-aws/app/api/app.jar
-          cp -r dist/ ./100masu-trainer-aws/app/web/dist/
+          cp -r .nuxt/ ./100masu-trainer-aws/app/web/.nuxt/
 
       - name: Npm Install
         working-directory: ./100masu-trainer-aws
