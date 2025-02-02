@@ -104,7 +104,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: web-artifact
-          path: dist/
+          path: ./dist/
 
       - name: Copy distribution
         run: |
