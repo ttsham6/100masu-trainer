@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "nodenext",
+    "module": "NodeNext",
     "strict": true,
     "jsx": "preserve",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

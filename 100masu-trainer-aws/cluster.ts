@@ -10,7 +10,7 @@ export interface ClusterArgs {
   albSgId: pulumi.Output<string>;
   containerSgId: pulumi.Output<string>;
   contextPath: string;
-  heatlthCheckPath?: string;
+  healthCheckPath?: string;
   environments: Object[];
 }
 
@@ -46,7 +46,7 @@ export class Cluster extends pulumi.ComponentResource {
           port: containerPort,
           healthCheck: {
             enabled: true,
-            path: args.heatlthCheckPath || "/",
+            path: args.healthCheckPath || "/",
             port: `${containerPort}`,
             protocol: "HTTP",
             timeout: 10,
