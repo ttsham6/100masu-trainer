@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import mime from "mime";
+import * as mime from "mime-lite";
 import * as fs from "fs";
 import * as path from "path";
 
