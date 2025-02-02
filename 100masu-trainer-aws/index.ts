@@ -2,6 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as network from "./network";
 import * as db from "./db";
 import * as cluster from "./cluster";
+import * as s3 from "./s3";
 
 const config = new pulumi.Config();
 
@@ -36,17 +37,10 @@ const apiCluster = new cluster.Cluster("masu-api", {
   ],
 });
 
-// WEB Cluster
-const webCluster = new cluster.Cluster("masu-web", {
-  clusterName: "WebCluster",
-  assignPublicIp: true,
-  vpcId: vpc.vpcId,
-  subnetIds: vpc.webSubnetIds,
-  albSgId: vpc.webAlbSecurityGroupId,
-  containerSgId: vpc.webSecurityGroupId,
-  contextPath: "./app/web",
-  environments: [],
+// WEB site
+const webS3 = new s3.S3bucket("masu-web", {
+  bucketName: "masu-web",
+  siteDir: "./app/web/dist",
 });
 
-// The URL at which the container's HTTP endpoint will be available
-export const url = pulumi.interpolate`http://${webCluster.dnsName}`;
+exports.webUrl = webS3.bucket.websiteEndpoint;

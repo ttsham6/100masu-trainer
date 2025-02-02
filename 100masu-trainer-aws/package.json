@@ -7,6 +7,9 @@
     "dependencies": {
         "@pulumi/aws": "^6.66.2",
         "@pulumi/awsx": "^2.19.0",
-        "@pulumi/pulumi": "^3.144.1"
+        "@pulumi/pulumi": "^3.144.1",
+        "fs": "^0.0.1-security",
+        "mime": "^4.0.6",
+        "path": "^0.12.7"
     }
 }

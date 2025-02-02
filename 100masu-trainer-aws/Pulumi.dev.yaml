@@ -1,8 +1,9 @@
 config:
+  aws:profile: pulumi
+  aws:region: ap-northeast-1
   100masu-trainer-aws:environment: dev
   100masu-trainer-aws:containerPort: "80"
   100masu-trainer-aws:cpu: "256"
   100masu-trainer-aws:memory: "256"
-  aws:region: ap-northeast-1
   100masu-trainer-aws:dbPassword:
     secure: AAABAOPRL/cNiZUEnuTG/EiyIg+Mp75CbU9Xrt/p+aohy+d1uXvLR/c=
