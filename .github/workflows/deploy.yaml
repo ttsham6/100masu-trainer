@@ -36,7 +36,7 @@ jobs:
         run: cp build/libs/*.jar build/libs/app.jar
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api-artifact
           path: ./100masu-trainer-api/build/libs/app.jar
@@ -62,7 +62,7 @@ jobs:
         run: npm run build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-artifact
           path: ./100masu-trainer-web/dist/
@@ -97,13 +97,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Download API artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: api-artifact
           path: ./
 
       - name: Download web artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: web-artifact
           path: dist/
