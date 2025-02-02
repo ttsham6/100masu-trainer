@@ -6,4 +6,4 @@ config:
   100masu-trainer-aws:cpu: "256"
   100masu-trainer-aws:memory: "256"
   100masu-trainer-aws:dbPassword:
-    secure: AAABAOPRL/cNiZUEnuTG/EiyIg+Mp75CbU9Xrt/p+aohy+d1uXvLR/c=
+    secure: AAABAB13mrQ1rqj7otCRlILFjRUkykO8pom97IC1+3B7fcn4455XuVI=
