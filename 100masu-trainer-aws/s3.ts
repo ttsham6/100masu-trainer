@@ -26,6 +26,17 @@ export class S3bucket extends pulumi.ComponentResource {
       { parent: this }
     );
 
+    new aws.s3.BucketWebsiteConfigurationV2(
+      `${serviceName}-web-bucket-config`,
+      {
+        bucket: siteBucket.id,
+        indexDocument: {
+          suffix: "index.html",
+        },
+      },
+      { parent: this }
+    );
+
     // Upload all files in the siteDir to the S3 bucket
     const addFolderContents = (
       s3bucket: aws.s3.Bucket,
@@ -59,6 +70,15 @@ export class S3bucket extends pulumi.ComponentResource {
     addFolderContents(siteBucket, args.siteDir, "");
 
     // Expose a website index document
+    new aws.s3.BucketPublicAccessBlock(
+      `${serviceName}-web-access-block`,
+      {
+        bucket: siteBucket.id,
+        blockPublicAcls: false,
+      },
+      { parent: this }
+    );
+
     new aws.s3.BucketPolicy(
       `${serviceName}-web-bucket-policy`,
       {
@@ -76,26 +96,6 @@ export class S3bucket extends pulumi.ComponentResource {
             ],
           });
         }),
-      },
-      { parent: this }
-    );
-
-    new aws.s3.BucketWebsiteConfigurationV2(
-      "s3-website-bucket-config",
-      {
-        bucket: siteBucket.id,
-        indexDocument: {
-          suffix: "index.html",
-        },
-      },
-      { parent: this }
-    );
-
-    new aws.s3.BucketPublicAccessBlock(
-      "public-access-block",
-      {
-        bucket: siteBucket.id,
-        blockPublicAcls: false,
       },
       { parent: this }
     );
