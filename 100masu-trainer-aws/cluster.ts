@@ -36,12 +36,12 @@ export class Cluster extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    // An ALB to serve the container endpoint to the internet
-    const loadbalancer = new awsx.lb.ApplicationLoadBalancer(
-      `${serviceName}-lb`,
+    // NBL
+    const nlb = new awsx.lb.NetworkLoadBalancer(
+      `${serviceName}-nlb`,
       {
-        subnetIds: args.subnetIds,
         securityGroups: [args.albSgId],
+        subnetIds: args.subnetIds,
         defaultTargetGroup: {
           port: containerPort,
           healthCheck: {
@@ -90,7 +90,7 @@ export class Cluster extends pulumi.ComponentResource {
             portMappings: [
               {
                 containerPort: containerPort,
-                targetGroup: loadbalancer.defaultTargetGroup,
+                targetGroup: nlb.defaultTargetGroup,
               },
             ],
             environment: args.environments,
@@ -107,6 +107,6 @@ export class Cluster extends pulumi.ComponentResource {
     );
 
     // Set member variables for this component
-    this.dnsName = loadbalancer.loadBalancer.dnsName;
+    this.dnsName = nlb.loadBalancer.dnsName;
   }
 }
