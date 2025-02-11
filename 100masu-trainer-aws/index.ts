@@ -3,6 +3,7 @@ import * as network from "./network";
 import * as db from "./db";
 import * as cluster from "./cluster";
 import * as s3 from "./s3";
+import * as apigateway from "./apigateway";
 
 const config = new pulumi.Config();
 
@@ -18,13 +19,12 @@ const pjDb = new db.Db("masu", {
   securityGroupId: vpc.dbSecurityGroupId,
 });
 
-// Api
+// API
 const apiCluster = new cluster.Cluster("masu-api", {
   clusterName: "ApiCluster",
   assignPublicIp: false,
   vpcId: vpc.vpcId,
   subnetIds: vpc.apiSubnetIds,
-  albSgId: vpc.apiAlbSecurityGroupId,
   containerSgId: vpc.apiSecurityGroupId,
   contextPath: "./app/api",
   healthCheckPath: "/actuator/health",
@@ -35,6 +35,12 @@ const apiCluster = new cluster.Cluster("masu-api", {
     { name: "DB_PASSWORD", value: pjDb.password },
     { name: "SPRING_PROFILES_ACTIVE", value: config.get("environment") },
   ],
+});
+
+// API Gateway
+const apiGateway = new apigateway.Apigateway("masu", {
+  dnsName: apiCluster.dnsName,
+  lbArn: apiCluster.lbArn,
 });
 
 // WEB site
