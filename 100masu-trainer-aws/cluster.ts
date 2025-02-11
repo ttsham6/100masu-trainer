@@ -41,7 +41,6 @@ export class Cluster extends pulumi.ComponentResource {
     const nlb = new awsx.lb.NetworkLoadBalancer(
       `${serviceName}-nlb`,
       {
-        securityGroups: [args.albSgId],
         subnetIds: args.subnetIds,
         defaultTargetGroup: {
           protocol: "TCP",
@@ -49,7 +48,8 @@ export class Cluster extends pulumi.ComponentResource {
           targetType: "ip",
           healthCheck: {
             enabled: true,
-            protocol: "TCP",
+            protocol: "HTTP",
+            path: args.healthCheckPath || "/",
             timeout: 30,
           },
         },
@@ -98,7 +98,7 @@ export class Cluster extends pulumi.ComponentResource {
           },
         },
         networkConfiguration: {
-          assignPublicIp: true,
+          assignPublicIp: false,
           subnets: args.subnetIds,
           securityGroups: [args.containerSgId],
         },
