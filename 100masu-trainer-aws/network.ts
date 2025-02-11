@@ -10,7 +10,6 @@ export class Vpc extends pulumi.ComponentResource {
   public readonly apiSubnetIds: pulumi.Output<string[]>;
   public readonly dbSubnetIds: pulumi.Output<string[]>;
   // Security Groups
-  public readonly apiAlbSecurityGroupId: pulumi.Output<string>;
   public readonly apiSecurityGroupId: pulumi.Output<string>;
   public readonly dbSecurityGroupId: pulumi.Output<string>;
 
@@ -174,27 +173,6 @@ export class Vpc extends pulumi.ComponentResource {
     }
 
     // Security Group
-    const apiAlbSg = new aws.ec2.SecurityGroup(
-      `${pjName}-api-alb-sg`,
-      {
-        vpcId: vpc.id,
-        tags: { Name: `${pjName}-api-alb-sg` },
-      },
-      { parent: this }
-    );
-    new SecurityGroupIngressRule(
-      `${pjName}-api-alb-sg-ingress-80`,
-      {
-        securityGroupId: apiAlbSg.id,
-        cidrIpv4: "18.180.88.0/23", // API gateway IP range at ap-northeast-1
-        ipProtocol: "tcp",
-        fromPort: 443,
-        toPort: 443,
-      },
-      { parent: this }
-    );
-    setAllAllowEgressRule(apiAlbSg.id, `${pjName}-api-alb-sg`, this);
-
     const apiSecurityGroup = new aws.ec2.SecurityGroup(
       `${pjName}-api-sg`,
       {
@@ -207,7 +185,7 @@ export class Vpc extends pulumi.ComponentResource {
       `${pjName}-api-sg-ingress`,
       {
         securityGroupId: apiSecurityGroup.id,
-        referencedSecurityGroupId: apiAlbSg.id,
+        cidrIpv4: "10.0.0.128/25",
         ipProtocol: "tcp",
         fromPort: 80,
         toPort: 80,
@@ -244,7 +222,6 @@ export class Vpc extends pulumi.ComponentResource {
     this.publicSubnetIds = pulumi.output(publicSubnets.map((s) => s.id));
     this.apiSubnetIds = pulumi.output(apiSubnets.map((s) => s.id));
     this.dbSubnetIds = pulumi.output(dbSubnets.map((s) => s.id));
-    this.apiAlbSecurityGroupId = apiAlbSg.id;
     this.apiSecurityGroupId = apiSecurityGroup.id;
     this.dbSecurityGroupId = dbSecurityGroup.id;
 

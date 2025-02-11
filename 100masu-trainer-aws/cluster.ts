@@ -7,7 +7,6 @@ export interface ClusterArgs {
   assignPublicIp: boolean;
   vpcId: pulumi.Output<string>;
   subnetIds: pulumi.Output<string[]>;
-  albSgId: pulumi.Output<string>;
   containerSgId: pulumi.Output<string>;
   contextPath: string;
   healthCheckPath?: string;
