@@ -7,10 +7,40 @@ on:
     paths:
       - "100masu-trainer-aws/**"
       - "100masu-trainer-web/**"
-      # - "100masu-trainer-api/**" // TODO: Add API Deploy
+      - "100masu-trainer-api/**"
 
 jobs:
-  # TODO: Add API build job
+  api-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Gradle Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Gradle build
+        working-directory: ./100masu-trainer-api
+        run: ./gradlew build
+
+      - name: copy jar
+        working-directory: ./100masu-trainer-api
+        run: cp build/libs/*.jar build/libs/app.jar
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact
+          path: ./100masu-trainer-api/build/libs/app.jar
+
   web-build:
     runs-on: ubuntu-latest
 
@@ -32,13 +62,13 @@ jobs:
         run: npm run build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-artifact
           path: ./100masu-trainer-web/dist/
 
   pulumi-up:
-    needs: web-build
+    needs: [web-build, api-build]
 
     runs-on: ubuntu-latest
 
@@ -46,28 +76,50 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ secrets.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: Download API artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-artifact
+          path: ./
+
       - name: Download web artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: web-artifact
           path: dist/
 
       - name: Copy distribution
-        run: cp -r dist/ ./100masu-trainer-aws/app/web/dist/
+        run: |
+          cp -r app.jar ./100masu-trainer-aws/app/api/app.jar
+          mkdir -p ./100masu-trainer-aws/app/web/dist/
+          cp -r dist/ ./100masu-trainer-aws/app/web/dist/
 
       - name: Npm Install
         working-directory: ./100masu-trainer-aws
         run: npm install
 
       - name: Pulumi preview
-        uses: pulumi/actions@v3
+        uses: pulumi/actions@v6
         with:
           command: up
           stack-name: ttsham6/100masu-trainer-aws/dev

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onUnmounted } from "vue";
 
 // 10x10 のグリッドを初期化
 const grid = ref(Array.from({ length: 10 }, () => Array(10).fill("")));
@@ -15,8 +15,50 @@ const columnNumbers = ref(
 // 結果（正誤判定）を格納
 const results = ref(Array.from({ length: 10 }, () => Array(10).fill(true)));
 
-// 計算結果を送信（正誤判定）
+// タイマー管理
+const startTime = ref<number | null>(null);
+const timer = ref<ReturnType<typeof setInterval> | null>(null); // 型を指定
+const elapsedTime = ref<string>("");
+
+// ゲーム状態管理
+const isStarted = ref(false); // スタート前はマスを非表示
+
+// タイマーを開始
+const startCalculation = () => {
+  isStarted.value = true; // スタート時にマスを表示
+  startTime.value = Date.now();
+  elapsedTime.value = "0分0秒";
+  grid.value = Array.from({ length: 10 }, () => Array(10).fill(""));
+
+  // タイマーを定期的に更新
+  if (timer.value) {
+    clearInterval(timer.value);
+  }
+  timer.value = setInterval(() => {
+    if (startTime.value) {
+      const now = Date.now();
+      const totalSeconds = Math.floor((now - startTime.value) / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      elapsedTime.value = `${minutes}分${seconds}秒`;
+    }
+  }, 1000);
+};
+
+const resetCalculation = () => {
+  isStarted.value = false;
+  elapsedTime.value = "0分0秒";
+  grid.value = Array.from({ length: 10 });
+};
+
+// 答え合わせ
 const submitCalculation = () => {
+  if (!startTime.value) {
+    alert("計算を開始してください！");
+    return;
+  }
+
+  // 正誤判定
   results.value = grid.value.map((row, rowIndex) =>
     row.map((cell, colIndex) => {
       const correctAnswer =
@@ -30,16 +72,27 @@ const submitCalculation = () => {
     .flat()
     .filter((isCorrect) => isCorrect).length;
 
-  // 正解数をコンソールに表示
-  console.log(`${correctCount}点！`);
+  // タイマーを停止
+  if (timer.value) {
+    clearInterval(timer.value);
+    timer.value = null;
+  }
 
-  alert("計算結果を確認してください！");
+  alert(
+    `計算結果を確認してください！\n正解数: ${correctCount}点\n経過時間: ${elapsedTime.value}`
+  );
 };
+
+// クリーンアップ（コンポーネントが破棄されたとき）
+onUnmounted(() => {
+  if (timer.value) {
+    clearInterval(timer.value);
+  }
+});
 
 // 入力バリデーション（1~9 の範囲に制限）
 const validateInput = (row: number, col: number) => {
   let value = grid.value[row][col];
-
   if (!/^\d{1,3}$/.test(value)) {
     grid.value[row][col] = ""; // 不正な入力をクリア
   }
@@ -103,9 +156,13 @@ body {
   height: 100vh;
   margin: 0;
   background-color: #f9f9f9;
+  overflow: hidden;
 }
 .container {
   text-align: center;
+  overflow: auto; /* コンテンツが溢れた場合にスクロール可能にする */
+  max-height: 100vh;
+  padding-bottom: 70px;
 }
 table {
   border-collapse: collapse;
@@ -147,7 +204,7 @@ input.incorrect {
   left: 50%;
   transform: translate(-50%, -50%);
   color: red;
-  font-size: 12px; /* X印を細くするため、フォントサイズを小さくする */
+  font-size: 12px;
   pointer-events: none;
 }
 .button {
@@ -161,6 +218,7 @@ button {
   background-color: #4caf50;
   color: white;
   border-radius: 5px;
+  margin-right: 20px;
 }
 button:hover {
   background-color: #45a049;
@@ -170,38 +228,46 @@ button:hover {
 <template>
   <div class="container">
     <h1>100マス計算</h1>
-    <h2>足し算</h2>
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th v-for="col in 10" :key="col">{{ columnNumbers[col - 1] }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in 10" :key="row">
-          <td class="header-cell">{{ rowNumbers[row - 1] }}</td>
-          <td v-for="col in 10" :key="col" class="cell">
-            <input
-              type="text"
-              maxlength="3"
-              v-model="grid[row - 1][col - 1]"
-              :class="{ incorrect: isIncorrect(row - 1, col - 1) }"
-              tabindex="0"
-              inputmode="numeric"
-              @focus="setInputToHalfWidth(row - 1, col - 1)"
-              @keydown="handleKeydown($event, row - 1, col - 1)"
-              @input="validateInput(row - 1, col - 1)"
-            />
-            <span v-if="isIncorrect(row - 1, col - 1)" class="error-mark"
-              >✖</span
-            >
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="button">
+    <b>足し算</b>
+    <div class="button" v-if="!isStarted">
+      <button @click="startCalculation">スタート</button>
+    </div>
+    <div v-if="isStarted" class="status-bar">
+      <p>時間経過: {{ elapsedTime }}</p>
+      <button @click="resetCalculation">最初からやり直す</button>
       <button @click="submitCalculation">答え合わせ</button>
+    </div>
+    <div v-if="isStarted">
+      <table>
+        <thead>
+          <tr>
+            <th>+</th>
+            <!-- 左上に "+" を追加 -->
+            <th v-for="col in 10" :key="col">{{ columnNumbers[col - 1] }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in 10" :key="row">
+            <td class="header-cell">{{ rowNumbers[row - 1] }}</td>
+            <td v-for="col in 10" :key="col" class="cell">
+              <input
+                type="text"
+                maxlength="3"
+                v-model="grid[row - 1][col - 1]"
+                :class="{ incorrect: isIncorrect(row - 1, col - 1) }"
+                tabindex="0"
+                inputmode="numeric"
+                @focus="setInputToHalfWidth(row - 1, col - 1)"
+                @keydown="handleKeydown($event, row - 1, col - 1)"
+                @input="validateInput(row - 1, col - 1)"
+              />
+              <span v-if="isIncorrect(row - 1, col - 1)" class="error-mark"
+                >✖</span
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>

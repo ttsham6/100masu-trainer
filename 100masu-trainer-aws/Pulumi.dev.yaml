@@ -1,8 +1,8 @@
 config:
+  aws:region: ap-northeast-1
   100masu-trainer-aws:environment: dev
   100masu-trainer-aws:containerPort: "80"
   100masu-trainer-aws:cpu: "256"
   100masu-trainer-aws:memory: "256"
-  aws:region: ap-northeast-1
   100masu-trainer-aws:dbPassword:
-    secure: AAABAK7QmNUPwpPFbIsC2Hq5u+wLGwqCrSMgQiPbVx26AdQs20QIQ5g=
+    secure: AAABAHx+sCZGsXIvNVqw92RXjuEdX3QBphs8p8cWaOTvzWVFcDq+OpE=

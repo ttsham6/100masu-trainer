@@ -2,6 +2,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as network from "./network";
 import * as db from "./db";
 import * as cluster from "./cluster";
+import * as s3 from "./s3";
+import * as apigateway from "./apigateway";
 
 const config = new pulumi.Config();
 
@@ -17,16 +19,15 @@ const pjDb = new db.Db("masu", {
   securityGroupId: vpc.dbSecurityGroupId,
 });
 
-// Api
+// API
 const apiCluster = new cluster.Cluster("masu-api", {
   clusterName: "ApiCluster",
   assignPublicIp: false,
   vpcId: vpc.vpcId,
   subnetIds: vpc.apiSubnetIds,
-  albSgId: vpc.apiAlbSecurityGroupId,
   containerSgId: vpc.apiSecurityGroupId,
   contextPath: "./app/api",
-  heatlthCheckPath: "/actuator/health",
+  healthCheckPath: "/actuator/health",
   environments: [
     { name: "DB_HOST", value: pjDb.address },
     { name: "DB_NAME", value: pjDb.dbName },
@@ -36,17 +37,16 @@ const apiCluster = new cluster.Cluster("masu-api", {
   ],
 });
 
-// WEB Cluster
-const webCluster = new cluster.Cluster("masu-web", {
-  clusterName: "WebCluster",
-  assignPublicIp: true,
-  vpcId: vpc.vpcId,
-  subnetIds: vpc.webSubnetIds,
-  albSgId: vpc.webAlbSecurityGroupId,
-  containerSgId: vpc.webSecurityGroupId,
-  contextPath: "./app/web",
-  environments: [],
+// API Gateway
+const apiGateway = new apigateway.Apigateway("masu", {
+  dnsName: apiCluster.dnsName,
+  lbArn: apiCluster.lbArn,
 });
 
-// The URL at which the container's HTTP endpoint will be available
-export const url = pulumi.interpolate`http://${webCluster.dnsName}`;
+// WEB site
+const webS3 = new s3.S3bucket("masu-web", {
+  bucketName: "masu-web",
+  siteDir: "./app/web/dist",
+});
+
+exports.webUrl = webS3.bucket.websiteEndpoint;

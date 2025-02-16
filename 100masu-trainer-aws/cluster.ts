@@ -7,15 +7,15 @@ export interface ClusterArgs {
   assignPublicIp: boolean;
   vpcId: pulumi.Output<string>;
   subnetIds: pulumi.Output<string[]>;
-  albSgId: pulumi.Output<string>;
   containerSgId: pulumi.Output<string>;
   contextPath: string;
-  heatlthCheckPath?: string;
+  healthCheckPath?: string;
   environments: Object[];
 }
 
 export class Cluster extends pulumi.ComponentResource {
   public readonly dnsName: pulumi.Output<string>;
+  public readonly lbArn: pulumi.Output<string>;
 
   constructor(
     serviceName: string,
@@ -36,20 +36,20 @@ export class Cluster extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    // An ALB to serve the container endpoint to the internet
-    const loadbalancer = new awsx.lb.ApplicationLoadBalancer(
-      `${serviceName}-lb`,
+    // NLB
+    const nlb = new awsx.lb.NetworkLoadBalancer(
+      `${serviceName}-nlb`,
       {
         subnetIds: args.subnetIds,
-        securityGroups: [args.albSgId],
         defaultTargetGroup: {
+          protocol: "TCP",
           port: containerPort,
+          targetType: "ip",
           healthCheck: {
             enabled: true,
-            path: args.heatlthCheckPath || "/",
-            port: `${containerPort}`,
-            protocol: "http",
-            timeout: 10,
+            protocol: "HTTP",
+            path: args.healthCheckPath || "/",
+            timeout: 30,
           },
         },
       },
@@ -90,14 +90,14 @@ export class Cluster extends pulumi.ComponentResource {
             portMappings: [
               {
                 containerPort: containerPort,
-                targetGroup: loadbalancer.defaultTargetGroup,
+                targetGroup: nlb.defaultTargetGroup,
               },
             ],
             environment: args.environments,
           },
         },
         networkConfiguration: {
-          assignPublicIp: true,
+          assignPublicIp: false,
           subnets: args.subnetIds,
           securityGroups: [args.containerSgId],
         },
@@ -107,6 +107,7 @@ export class Cluster extends pulumi.ComponentResource {
     );
 
     // Set member variables for this component
-    this.dnsName = loadbalancer.loadBalancer.dnsName;
+    this.dnsName = nlb.loadBalancer.dnsName;
+    this.lbArn = nlb.loadBalancer.arn;
   }
 }
