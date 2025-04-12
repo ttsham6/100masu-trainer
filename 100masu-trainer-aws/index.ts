@@ -1,7 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
-import * as s3 from "./s3";
-
-const config = new pulumi.Config();
+import * as s3 from "./aws/s3";
 
 // WEB site
 const webS3 = new s3.S3bucket("masu-web", {
