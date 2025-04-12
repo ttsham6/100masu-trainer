@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 export interface S3bucketArgs {
-  bucketName: string;
+  domainName: string;
   siteDir: string;
 }
 
@@ -22,17 +22,33 @@ export class S3bucket extends pulumi.ComponentResource {
     // S3 bucket
     const siteBucket = new aws.s3.Bucket(
       `${serviceName}-web-bucket`,
-      {},
+      {
+        bucket: args.domainName,
+        website: {
+          indexDocument: "index.html",
+          // errorDocument: "error.html", // TODO: add error page
+        },
+      },
       { parent: this }
     );
 
-    new aws.s3.BucketWebsiteConfigurationV2(
-      `${serviceName}-web-bucket-config`,
+    new aws.s3.BucketPolicy(
+      `${serviceName}-web-bucket-policy`,
       {
-        bucket: siteBucket.id,
-        indexDocument: {
-          suffix: "index.html",
-        },
+        bucket: siteBucket.bucket,
+        policy: siteBucket.bucket.apply((bucket) => {
+          return JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+              {
+                Effect: "Allow",
+                Principal: "*",
+                Action: "s3:GetObject",
+                Resource: `arn:aws:s3:::${bucket}/*`,
+              },
+            ],
+          });
+        }),
       },
       { parent: this }
     );
@@ -78,28 +94,6 @@ export class S3bucket extends pulumi.ComponentResource {
       },
       { parent: this }
     );
-
-    new aws.s3.BucketPolicy(
-      `${serviceName}-web-bucket-policy`,
-      {
-        bucket: siteBucket.bucket,
-        policy: siteBucket.bucket.apply((bucket) => {
-          return JSON.stringify({
-            Version: "2012-10-17",
-            Statement: [
-              {
-                Effect: "Allow",
-                Principal: "*",
-                Action: "s3:GetObject",
-                Resource: `arn:aws:s3:::${bucket}/*`,
-              },
-            ],
-          });
-        }),
-      },
-      { parent: this }
-    );
-
     this.bucket = siteBucket;
   }
 }
