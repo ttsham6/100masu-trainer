@@ -1,7 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as s3 from "./aws/s3";
 import * as route53 from "./aws/route53";
-import * as cloudfront from "./aws/cloudfront";
 import * as aws from "@pulumi/aws";
 
 const config = new pulumi.Config();
