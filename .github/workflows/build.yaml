@@ -71,10 +71,7 @@ jobs:
       - name: Copy distribution
         run: |
           mkdir -p ./100masu-trainer-aws/app/web/dist/
-          cp -r dist/ ./100masu-trainer-aws/app/web/dist/
-
-      - name: list dist path
-        run: ls -la ./100masu-trainer-aws/app/web/dist/
+          cp -r dist/* ./100masu-trainer-aws/app/web/dist/
 
       - name: Npm Install
         working-directory: ./100masu-trainer-aws
