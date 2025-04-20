@@ -63,11 +63,12 @@ export class S3bucket extends pulumi.ComponentResource {
         const filePath = path.join(siteDir, item);
 
         if (fs.lstatSync(filePath).isDirectory()) {
-          addFolderContents(s3bucket, filePath, prefix);
+          const subPrefix = path.posix.join(prefix, item);
+          addFolderContents(s3bucket, filePath, subPrefix);
           return;
         }
 
-        const itemPath = path.basename(item); // Upload files directly to the root of the S3 bucket
+        const itemPath = path.posix.join(prefix, item); // Maintain folder structure in S3 bucket
 
         new aws.s3.BucketObject(
           itemPath,
